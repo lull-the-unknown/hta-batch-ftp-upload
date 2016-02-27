@@ -1,4 +1,36 @@
-﻿body
+﻿body {
+    background-color: #F0F8FF /*aliceblue*/;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    padding-bottom:10%;
+}
+
+td {
+    padding-top: 0.3em;
+}
+
+    td:first-child {
+        text-align: right;
+    }
+
+input[type=text] {
+    padding-left: 0.2em;
+    /*letter-spacing: 1px;*/
+}
+
+#txtDir {
+    width: 30em;
+}
+
+#txtSummaryFileName {
+    width: 20em;
+}
+
+#fileSelector 
 {
-    background-color:#F0F8FF /*aliceblue*/;
+    width: 0px;
+}
+
+#optPreset
+{
+    width: 10em;
 }

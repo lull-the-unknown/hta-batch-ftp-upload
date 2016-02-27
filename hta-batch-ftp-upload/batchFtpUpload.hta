@@ -4,30 +4,172 @@
 <head>
     <meta charset="utf-8" />
     <title>Batch FTP Upload</title>
-    <HTA:APPLICATION
-        APPLICATIONNAME="Batch FTP Upload"
-        VERSION="26Feb2016"
-        ICON="src/upload-3-multi-size.ico"
-        SCROLL="auto"
-        SINGLEINSTANCE="yes"
-        CAPTION="yes
-        CONTEXTMENU="no"
->
+    <hta:application
+        applicationname="Batch FTP Upload"
+        version="26Feb2016"
+        icon="src/upload-3-multi-size.ico"
+        scroll="auto"
+        singleinstance="yes"
+        caption="yes"
+        contextmenu="no">
         <link href="src/style.css" rel="stylesheet" />
+        <script type="text/javascript">
+            function fileSelector_change() {
+                var txt = document.getElementById('txtDir');
+                if (txt == null)
+                    return;
+                var filePicker = document.getElementById('fileSelector');
+                if (filePicker == null)
+                    return;
+                var val = filePicker.value;
+                val = val.substr(0, val.lastIndexOf('\\'));
+                txt.value = val;
+                txtDir_Change();
+            }
+        </script>
+        <script type="text/vbscript">
+            Sub Startup
+                curDate = Now()
+                Set txt = document.getElementById("txtSummaryFileName")
+                If Not txt Is Nothing Then 
+                    txt.value = "ClientFileSummary" & Year(curDate) & "-" & PadZero(Month(curDate)) & "-" & PadZero(Day(curDate)) & "-" & _
+                                    PadZero(Hour(curDate)) & "-" & PadZero(Minute(curDate)) & ".csv"
+                End If
+            End Sub
+            Function PadZero( str )
+                While Len(str) < 2
+                    str = "0" & str
+                Wend
+                PadZero = str
+            End Function
+            Sub txtDir_Change
+                Set txt = document.getElementById("txtDir")
+                If (txt Is Nothing) Then Exit Sub
+
+                Set lbl = document.getElementById("lblDirectoryStatus")
+                If (lbl Is Nothing) Then Exit Sub
+
+                Set fso = CreateObject("Scripting.FileSystemObject")
+                If Not fso.FolderExists(txt.value) Then
+                    lbl.innerHTML = "Directory Not Found"
+                    Exit Sub
+                End If
+                
+                Set folder = fso.GetFolder(txt.value)
+                Set files = folder.Files
+                If files.Count < 1 Then
+                    lbl.innerHTML = "Directory Empty"
+                End If
+
+                count = 0
+                ext = ""
+                For Each f In files
+                    ext = f.Name
+                    If Len(ext) >= 4 Then
+                        ext = Right(ext,4)
+                        If ext = ".csv" Then count = count + 1
+                    End If
+                Next
+                lbl.innerHTML = count & " files found"
+            End Sub
+        </script>
 </head>
-<body>
-    <h1>Batch FTP Upload</h1><hr />
-    <p>Items needed:<br />
+<body onload="vbscript:Startup">
+    <h1>Batch FTP Upload</h1>
+    <hr />
+    <p>
+        Items needed:<br />
         <ul>
-            <li>Directory to find .csv's</li>
-            <li>Name of summary file (e.g. "ClientFileSummary2016-02-26-10-02.csv")</li>
+            <li style="text-decoration: line-through">Directory to find .csv's</li>
+            <li style="text-decoration: line-through">Name of summary file (e.g. "ClientFileSummary2016-02-26-10-02.csv")</li>
             <li>Process for generating summary file</li>
-            <li>ftp host address</li>
-            <li>ftp username/password</li>
-            <li>ftp directory</li>
+            <li style="text-decoration: line-through">ftp host address</li>
+            <li style="text-decoration: line-through">ftp username/password</li>
+            <li style="text-decoration: line-through">ftp directory</li>
             <li>what to do with .csv's when finished (e.g. move to "2016" subfolder)</li>
             <li>selectable presets</li>
         </ul>
+        <hr />
     </p>
+    <form action="#" method="post">
+        <table cellspacing="0">
+            <tr>
+                <td>
+                    <label for="txtDir">Select a preset:</label>
+                </td>
+                <td>
+                    <select id="optPreset">
+                        <option value="None" selected="selected">None</option>
+                    </select>
+                    <input type="button" id="btnPreset" value="Manage Presets" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtDir">Directory:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtDir" value="\\myServerName\myFolder\mySubFolder\yetAnother\" onchange="txtDir_Change();" />
+                    <input type="file" id="fileSelector" value="" onchange="vbscript:fileSelector_Change" />
+                    <label for="fileSelector">(select one of the .csv files)</label>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0px;">&nbsp;</td>
+                <td style="padding-top: 0px; padding-bottom: 1em; font-size: small;">
+                    <div>
+                        <span>Status:</span>
+                        <span id="lblDirectoryStatus">Unknown</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtSummaryFileName">Summary filename:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtSummaryFileName" value="" />
+                    <label for="txtSummaryFileName">(leave blank to exclude the summary file)</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtFtpHost">FTP Host:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtFtpHost" value="ftp.example.com" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtFtpUser">FTP Username:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtFtpUser" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtFtpPassword">FTP Password:</label>
+                </td>
+                <td>
+                    <input type="password" id="txtFtpPassword" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtFtpDirectory">FTP Directory:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtFtpDirectory" value="/myDataDir/" />
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+
+        </table>
+    </form>
 </body>
 </html>
