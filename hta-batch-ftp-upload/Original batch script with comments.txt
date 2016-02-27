@@ -1,0 +1,83 @@
+@echo off
+::disables command echoing
+
+set FTPINDEXNAME=ClientFileSummary%DATE:~10,4%-%DATE:~4,2%-%DATE:~7,2%-%TIME:~0,2%-%TIME:~3,2%.csv
+:: sets variable %FTPINDEXNAME% to, for example, "ClientFileSummary2016-02-26-10-02.csv"
+:: where %DATE% is, for example, "Fri 02/26/2016", %DATE:~10,4% is "2016", %DATE:~4,2% is "02", etc
+:: where %TIME% is, for example, "10:02:56.99"
+
+set FTPINDEXNAME=%FTPINDEXNAME: =0%
+:: replaces all spaces in %FTPINDEXNAME% with "0"s
+:: for example, if something went horribly horribly wrong when generating the file name, "Cli Fi Summar 16-0 10 csv" would be replaced with "Cli0Fi0Summar016-00100csv", notice all the spaces were replaced with zeros
+
+for %%1 in (\\myServerName\myFolder\mySubFolder\yetAnother\*.csv) do awk -f batchftp.awk "%%1" >> %FTPINDEXNAME%
+:: for each .csv file found in that dir, append the output of the command to the output file
+:: where the command is (awk -f batchftp.awk "%%1"), with %%1 being the current .csv file in the for loop
+:: where the output file corresponds to the filename held in the %FTPINDEXNAME% variable (e.g. "ClientFileSummary2016-02-26-10-02.csv")
+:: note: the awk command does not appear to be standard on Windows systems and will need to be provided for this to work
+:: note: I do not know what the awk command does. It runs the script held in the file "batchftp.awk", but I do not have that script
+
+echo user myUserName myPassword > batchftp.txt
+:: writes the line "user myUserName myPassword" to the file "batchftp.txt", if "batchftp.txt" already exists it is discarded and replaced
+
+echo cd /myDataDir/  >> batchftp.txt
+:: appends the line "cd /myDataDir/" to the file "batchftp.txt"
+
+echo put %FTPINDEXNAME% >> batchftp.txt
+:: appends the line "put %FTPINDEXNAME%" to the file "batchftp.txt"
+:: %FTPINDEXNAME% is replaced with the filename held in the variable %FTPINDEXNAME% 
+:: e.g. appends the line "put ClientFileSummary2016-02-26-10-02.csv"
+
+for %%1 in (\\myServerName\myFolder\mySubFolder\yetAnother\*.csv) do echo put "%%1" >> batchftp.txt
+:: for each .csv file found in that dir, appends the line 'put "%%1"' to the file "batchftp.txt", with %%1 being the current .csv file in the for loop
+:: note: the dir is the same as the previous for loop, this is running on the same set of .csv files
+
+echo quit >> batchftp.txt
+:: appends "quit" to the file "batchftp.txt"
+
+ftp -n -s:batchftp.txt ftp.example.com
+:: initiates an ftp upload
+:: where "-n" means "Suppresses auto-login upon initial connection."
+:: where "-s:batchftp.txt" means the file "batchftp.txt" contains the ftp-commands to process
+:: where "ftp.example.com" is the ftp host to run the ftp-commands against
+
+:: info on the ftp command may be found here: http://www.robvanderwoude.com/ftp.php
+
+:: the ftp command will run the ftp-commands in the batchftp.txt file against the specified ftp host
+:: the batchftp.txt file so far has (without the comments):
+::    user myUserName myPassword
+::    :: "send new user information", i.e. logs in with those credentials
+::    
+::    cd /myDataDir/
+::    :: "change remote working directory" to above
+::    
+::    put ClientFileSummary2016-02-26-10-02.csv
+::    :: "send one file", namely ClientFileSummary2016-02-26-10-02.csv
+::    
+::    put filename.csv
+::    put filename.csv
+::    put filename.csv
+::    put filename.csv
+::    :: "send one file", for each file found in the second for loop
+::    :: note: there will be a "put filename.csv" line for each .csv file from the second for loop
+::    :: note: where filename.csv will be the filename, not the literal string "filename.csv"
+::    
+::    quit
+::    :: "terminate ftp session and exit"
+
+:: these ftp-commands will be proccessed by the ftp command against the remote ftp host "ftp.example.com"
+
+
+del batchftp.txt
+:: deletes the file which held the ftp-commands used in the previous line
+
+move \\myServerName\myFolder\mySubFolder\yetAnother\*.csv \\myServerName\myFolder\mySubFolder\yetAnother\%DATE:~10,4%
+:: moves all the .csv files which were just processed into the folder %DATE:~10,4% (e.g. "2016" when %DATE% is "Fri 02/26/2016")
+
+:: END OF ORIGINAL BATCH FILE
+::
+:: apart from uploading each .csv file individually to the ftp server, 
+::   this batch file also generates another .csv file from the existing 
+::   .csv files using the awk script "batchftp.awk". This script will
+::   need to be analysed and customized to work with the target ftp
+:: 
