@@ -5,11 +5,21 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5EA73A26-F1E5-4FDD-B740-9A1230000CE2}"
 	ProjectSection(SolutionItems) = preProject
+		batchFtpUpload.hta = batchFtpUpload.hta
 		Original batch script with comments.txt = Original batch script with comments.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{43AD48F5-EFCB-45AA-A875-ECC9C71C65C4}"
+	ProjectSection(SolutionItems) = preProject
+		style.css = style.css
+		upload-3-multi-size.ico = upload-3-multi-size.ico
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{43AD48F5-EFCB-45AA-A875-ECC9C71C65C4} = {5EA73A26-F1E5-4FDD-B740-9A1230000CE2}
 	EndGlobalSection
 EndGlobal
