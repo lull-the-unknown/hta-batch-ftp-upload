@@ -38,11 +38,7 @@
                 <li style="text-decoration: line-through">Directory to find .csv's</li>
                 <li style="text-decoration: line-through">Name of summary file (e.g. "ClientFileSummary2016-02-26-10-02.csv")</li>
                 <li>Process for generating summary file</li>
-                <li style="text-decoration: line-through">ftp host address</li>
-                <li style="text-decoration: line-through">ftp username/password</li>
-                <li style="text-decoration: line-through">ftp directory</li>
                 <li>what to do with .csv's when finished (e.g. move to "2016" subfolder)</li>
-                <li style="text-decoration: line-through">selectable presets</li>
             </ul>
             <hr />
         </p>
@@ -87,7 +83,8 @@
         <table cellspacing="0" style="border:thin solid black">
             <tr><td><input type="button" id="btnEditPreset" value="Edit" onclick="javascript:btnEditPreset_Click();" /></td>
                 <td><input type="button" id="btnSaveEditPreset" value="Save" disabled="disabled" onclick="javascript: btnSaveEditPreset_Click();" />
-                    <input type="button" id="btnCancelEditPreset" value="Cancel" disabled="disabled" onclick="javascript: lstPresets_Change();"/></td></tr>
+                    <input type="button" id="btnCancelEditPreset" value="Cancel" disabled="disabled" onclick="javascript: lstPresets_Change();"/>
+                    <input type="button" id="btnDeletePreset" value="Delete" onclick="javascript: btnDeletePreset_Click();"/></td></tr>
             <tr><td><label for="txtEditName">Preset Name:</label></td>
                 <td><input type="text" id="txtEditName" value="" onchange="javascript:txtEditName_Change();"/>
                     <label for="txtEditName" id="lblEditNameValidation">&nbsp;</label>

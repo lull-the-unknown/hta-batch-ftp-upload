@@ -106,9 +106,9 @@ Function SavePreset( objPreset )
         Set root = xDoc.getElementsByTagName("presets").Item(0)
 	    Set xmlPresets = xDoc.getElementsByTagName("preset")
         lowername = LCase(objPreset.Name)
-        For Each xmlPresets In xmlPresets
-            If (LCase(xmlPresets.getAttribute("name")) = lowername ) Then
-                root.RemoveChild xmlPresets
+        For Each xmlPreset In xmlPresets
+            If (LCase(xmlPreset.getAttribute("name")) = lowername ) Then
+                root.RemoveChild xmlPreset
             End If
         Next
 
@@ -146,6 +146,38 @@ Function SavePreset( objPreset )
 		    Set xPE = Nothing
         End If
         SavePreset = False
+	End If
+	Set xDoc = Nothing
+End Function
+
+Sub AddXmlEl( doc, xmlParent, name, text)
+    Set el = doc.CreateElement(name)
+    el.AppendChild doc.createTextNode(text)
+
+    xmlParent.AppendChild doc.CreateTextNode(vbTab)
+    xmlParent.AppendChild(el)
+    xmlParent.AppendChild doc.CreateTextNode(vbNewLine & vbTab)
+End Sub
+
+
+Function DeletePreset( name )
+    Set xDoc = CreateObject( "MSXML2.DOMDocument" )
+	xDoc.async = False
+	xDoc.validateOnParse = False
+	If xDoc.Load("src/presets.xml") Then
+	    ' The document loaded successfully.
+        Set root = xDoc.getElementsByTagName("presets").Item(0)
+	    Set xmlPresets = xDoc.getElementsByTagName("preset")
+        lowername = LCase(name)
+        For Each xmlPreset In xmlPresets
+            If (LCase(xmlPreset.getAttribute("name")) = lowername ) Then
+                root.RemoveChild xmlPreset
+            End If
+        Next
+        xDoc.Save "src/presets.xml"
+        DeletePreset = True
+	Else
+        DeletePreset = False
 	End If
 	Set xDoc = Nothing
 End Function

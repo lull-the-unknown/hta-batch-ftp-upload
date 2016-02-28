@@ -110,15 +110,18 @@ function lstPresets_Change() {
     buttonStateChange_PresetNotEdit()
 }
 function buttonStateChange_PresetEdit() {
-    var btnEdit = document.getElementById('btnEditPreset');
-    if (btnEdit != null)
-        btnEdit.disabled = true;
-    var btnSave = document.getElementById('btnSaveEditPreset');
-    if (btnSave != null)
-        btnSave.disabled = false;
-    var btnCancel = document.getElementById('btnCancelEditPreset');
-    if (btnCancel != null)
-        btnCancel.disabled = false;
+    var el = document.getElementById('btnEditPreset');
+    if (el != null)
+        el.disabled = true;
+    el = document.getElementById('btnDeletePreset');
+    if (el != null)
+        el.disabled = true;
+    el = document.getElementById('btnSaveEditPreset');
+    if (el != null)
+        el.disabled = false;
+    el = document.getElementById('btnCancelEditPreset');
+    if (el != null)
+        el.disabled = false;
     el = document.getElementById('txtEditName');
     if (el != null)
         el.disabled = false;
@@ -146,6 +149,9 @@ function buttonStateChange_PresetEdit() {
 }
 function buttonStateChange_PresetNotEdit() {
     var el = document.getElementById('btnEditPreset');
+    if (el != null)
+        el.disabled = false;
+    el = document.getElementById('btnDeletePreset');
     if (el != null)
         el.disabled = false;
     el = document.getElementById('btnSaveEditPreset');
@@ -195,8 +201,11 @@ function btnSaveEditPreset_Click() {
     preset.FtpDirectory = trim(document.getElementById("txtEditFtpDirectory").value)
     preset.FtpUsername = trim(document.getElementById("txtEditFtpUser").value)
     preset.FtpPassword = trim(document.getElementById("txtEditFtpPassword").value)
-    if (SavePreset(preset))
+    if (SavePreset(preset)) {
+        alert(preset.Name+" saved.");
         window.location.reload()
+        return
+    }
     alert("Save failed.");
     //buttonStateChange_PresetNotEdit()
 }
@@ -318,4 +327,21 @@ function txtDir_Change( txtName, lblName ){
             count++
     }
     lbl.innerHTML = count + " files found"
+}
+function btnDeletePreset_Click() {
+    var name = trim(document.getElementById("lstPresets").value).toLowerCase()
+    if (name == "")
+        return
+    if (name == "new")
+        return
+    if (name == "none")
+        return
+
+    if (DeletePreset(name)) {
+        alert(trim(document.getElementById("lstPresets").value)+" deleted.");
+        window.location.reload()
+        return
+    }
+    alert("Delete failed.");
+    //buttonStateChange_PresetNotEdit()
 }
