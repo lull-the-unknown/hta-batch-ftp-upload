@@ -1,7 +1,7 @@
 ﻿body {
     background-color: #F0F8FF /*aliceblue*/;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    padding-bottom:10%;
+    padding-bottom: 10%;
 }
 
 td {
@@ -17,20 +17,23 @@ input[type=text] {
     /*letter-spacing: 1px;*/
 }
 
-#txtDir {
+#txtDir, #txtEditDir {
     width: 30em;
 }
 
-#txtSummaryFileName {
+#txtSummaryFileName, #txtEditSummaryFileName, #lstPresets {
     width: 20em;
 }
 
-#fileSelector 
-{
+#fileSelector, #EditfileSelector {
     width: 0px;
 }
 
-#optPreset
-{
+#optPreset {
     width: 10em;
+}
+
+#ErrorOut {
+    color: darkred;
+    font-weight: bold;
 }

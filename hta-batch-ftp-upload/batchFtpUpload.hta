@@ -13,6 +13,7 @@
         caption="yes"
         contextmenu="no">
         <link href="src/style.css" rel="stylesheet" />
+        <script type="text/vbscript" src="src/presets.vbs" ></script>
         <script type="text/javascript">
             function fileSelector_change() {
                 var txt = document.getElementById('txtDir');
@@ -26,22 +27,69 @@
                 txt.value = val;
                 txtDir_Change();
             }
+            function txtSummaryFileName_Change() {
+                var txt = document.getElementById('txtSummaryFileName');
+                if (txt == null)
+                    return;
+                var now = new Date();
+                var year = now.getFullYear();
+                var month = now.getMonth() + 1 + "";
+                if (month.length < 2)
+                    month = "0" + month;
+                var day = now.getDate() + "";
+                if (day.length < 2)
+                    day = "0" + day;
+                var hour = now.getHours() + 1 + "";
+                if (hour.length < 2)
+                    hour = "0" + hour;
+                var minute = now.getMinutes() + 1 + "";
+                if (minute.length < 2)
+                    minute = "0" + minute;
+                var second = now.getSeconds() + 1 + "";
+                if (second.length < 2)
+                    second = "0" + second;
+                txt.value = txt.value.replace(/{YEAR}/gi, year)
+                                     .replace(/{MONTH}/gi, month)
+                                     .replace(/{DAY}/gi, day)
+                                     .replace(/{HOUR}/gi, hour)
+                                     .replace(/{MINUTE}/gi, minute)
+                                     .replace(/{SECONDS?}/gi, second);
+            }
+            function btnPreset_Click() {
+                var frm = document.getElementById("frmMain");
+                if (frm != null)
+                    frm.style.display = "none";
+                frm = document.getElementById("frmPresets");
+                if (frm != null)
+                    frm.style.display = "";
+                document.body.style.backgroundColor = "#7FFFD4"; //aquamarine
+            }
+            function btnNotPreset_Click() {
+                var frm = document.getElementById("frmMain");
+                if (frm != null)
+                    frm.style.display = "";
+                frm = document.getElementById("frmPresets");
+                if (frm != null)
+                    frm.style.display = "none";
+                document.body.style.backgroundColor = "";
+            } 
         </script>
         <script type="text/vbscript">
             Sub Startup
-                curDate = Now()
-                Set txt = document.getElementById("txtSummaryFileName")
-                If Not txt Is Nothing Then 
-                    txt.value = "ClientFileSummary" & Year(curDate) & "-" & PadZero(Month(curDate)) & "-" & PadZero(Day(curDate)) & "-" & _
-                                    PadZero(Hour(curDate)) & "-" & PadZero(Minute(curDate)) & ".csv"
-                End If
+                'curDate = Now()
+                'Set txt = document.getElementById("txtSummaryFileName")
+                'If Not txt Is Nothing Then 
+                '    txt.value = "ClientFileSummary" & Year(curDate) & "-" & PadZero(Month(curDate)) & "-" & PadZero(Day(curDate)) & "-" & _
+                '                    PadZero(Hour(curDate)) & "-" & PadZero(Minute(curDate)) & ".csv"
+                'End If
+                LoadPresets
             End Sub
-            Function PadZero( str )
-                While Len(str) < 2
-                    str = "0" & str
-                Wend
-                PadZero = str
-            End Function
+            'Function PadZero( str )
+            '    While Len(str) < 2
+            '        str = "0" & str
+            '    Wend
+            '    PadZero = str
+            'End Function
             Sub txtDir_Change
                 Set txt = document.getElementById("txtDir")
                 If (txt Is Nothing) Then Exit Sub
@@ -75,33 +123,33 @@
         </script>
 </head>
 <body onload="vbscript:Startup">
-    <h1>Batch FTP Upload</h1>
-    <hr />
-    <p>
-        Items needed:<br />
-        <ul>
-            <li style="text-decoration: line-through">Directory to find .csv's</li>
-            <li style="text-decoration: line-through">Name of summary file (e.g. "ClientFileSummary2016-02-26-10-02.csv")</li>
-            <li>Process for generating summary file</li>
-            <li style="text-decoration: line-through">ftp host address</li>
-            <li style="text-decoration: line-through">ftp username/password</li>
-            <li style="text-decoration: line-through">ftp directory</li>
-            <li>what to do with .csv's when finished (e.g. move to "2016" subfolder)</li>
-            <li>selectable presets</li>
-        </ul>
+    <form id="frmMain">
+        <h1>Batch FTP Upload</h1>
         <hr />
-    </p>
-    <form action="#" method="post">
+        <p>
+            Items needed:<br />
+            <ul>
+                <li style="text-decoration: line-through">Directory to find .csv's</li>
+                <li style="text-decoration: line-through">Name of summary file (e.g. "ClientFileSummary2016-02-26-10-02.csv")</li>
+                <li>Process for generating summary file</li>
+                <li style="text-decoration: line-through">ftp host address</li>
+                <li style="text-decoration: line-through">ftp username/password</li>
+                <li style="text-decoration: line-through">ftp directory</li>
+                <li>what to do with .csv's when finished (e.g. move to "2016" subfolder)</li>
+                <li>selectable presets</li>
+            </ul>
+            <hr />
+        </p>
         <table cellspacing="0">
             <tr>
                 <td>
-                    <label for="txtDir">Select a preset:</label>
+                    <label for="optPreset">Select a preset:</label>
                 </td>
                 <td>
-                    <select id="optPreset">
+                    <select id="optPreset" onchange="vbscript:optPreset_Change">
                         <option value="None" selected="selected">None</option>
                     </select>
-                    <input type="button" id="btnPreset" value="Manage Presets" />
+                    <input type="button" id="btnPreset" value="Manage Presets" onclick="javascript: btnPreset_Click();" />
                 </td>
             </tr>
             <tr>
@@ -109,7 +157,7 @@
                     <label for="txtDir">Directory:</label>
                 </td>
                 <td>
-                    <input type="text" id="txtDir" value="\\myServerName\myFolder\mySubFolder\yetAnother\" onchange="txtDir_Change();" />
+                    <input type="text" id="txtDir" value="" onchange="javascript:txtDir_Change();" />
                     <input type="file" id="fileSelector" value="" onchange="vbscript:fileSelector_Change" />
                     <label for="fileSelector">(select one of the .csv files)</label>
                 </td>
@@ -128,7 +176,7 @@
                     <label for="txtSummaryFileName">Summary filename:</label>
                 </td>
                 <td>
-                    <input type="text" id="txtSummaryFileName" value="" />
+                    <input type="text" id="txtSummaryFileName" value="" onchange="javascript:txtSummaryFileName_Change();" />
                     <label for="txtSummaryFileName">(leave blank to exclude the summary file)</label>
                 </td>
             </tr>
@@ -137,7 +185,7 @@
                     <label for="txtFtpHost">FTP Host:</label>
                 </td>
                 <td>
-                    <input type="text" id="txtFtpHost" value="ftp.example.com" />
+                    <input type="text" id="txtFtpHost" value="" />
                 </td>
             </tr>
             <tr>
@@ -161,15 +209,107 @@
                     <label for="txtFtpDirectory">FTP Directory:</label>
                 </td>
                 <td>
-                    <input type="text" id="txtFtpDirectory" value="/myDataDir/" />
+                    <input type="text" id="txtFtpDirectory" value="" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <form id="frmPresets" style="display: none;">
+        <h1>Manage Presets 
+            <input type="button" name="btnNotPreset" value="Go Back" onclick="javascript:btnNotPreset_Click();" />
+        </h1>
+        <hr />
+        <h2>Presets:</h2>
+        <span>(Select one)</span><br />
+        <select id="lstPresets" size ="8">
+            <option value="None">--- No Presets Found ---</option>
+            <option value="New">&lt;Add New&gt;</option>
+        </select><br /><br />
+        <table cellspacing="0" style="border:thin solid black">
+            <tr>
+                <td>
+                    <input type="button" name="btnEditPreset" value="Edit" />
+                </td>
+                <td>
+                    <input type="button" name="btnCancelEditPreset" value="Cancel" disabled="disabled"/>
                 </td>
             </tr>
             <tr>
-                <td></td>
-                <td></td>
+                <td>
+                    <label for="txtEditName">Preset Name:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtEditName" value=""/>
+                </td>
             </tr>
-
+            <tr>
+                <td>
+                    <label for="txtEditDir">Directory:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtEditDir" value="" onchange="javascript:txEdittDir_Change();" />
+                    <input type="file" id="EditfileSelector" value="" onchange="vbscript:EditfileSelector_Change" />
+                    <label for="EditfileSelector">(select one of the .csv files)</label>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0px;">&nbsp;</td>
+                <td style="padding-top: 0px; padding-bottom: 1em; font-size: small;">
+                    <div>
+                        <span>Status:</span>
+                        <span id="lblEditDirectoryStatus">Unknown</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtEditSummaryFileName">Summary filename:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtEditSummaryFileName" value="" />
+                    <label for="txtEditSummaryFileName">(leave blank to exclude the summary file)</label>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0px;">&nbsp;</td>
+                <td style="padding-top: 0px; padding-bottom: 1em; font-size: small;">
+                    <label for="txtEditSummaryFileName">(use {year}, {month}, etc to enter parts of the date or time)</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtEditFtpHost">FTP Host:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtEditFtpHost" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtEditFtpUser">FTP Username:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtEditFtpUser" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtEditFtpPassword">FTP Password:</label>
+                </td>
+                <td>
+                    <input type="password" id="txtEditFtpPassword" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtEditFtpDirectory">FTP Directory:</label>
+                </td>
+                <td>
+                    <input type="text" id="txtEditFtpDirectory" value="" />
+                </td>
+            </tr>
         </table>
     </form>
+    <div id="ErrorOut">&nbsp;</div>
 </body>
 </html>

@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{43AD48F5-EFCB-45AA-A875-ECC9C71C65C4}"
 	ProjectSection(SolutionItems) = preProject
 		src\presets.vbs = src\presets.vbs
+		src\presets.xml = src\presets.xml
 		src\style.css = src\style.css
 		src\upload-3-multi-size.ico = src\upload-3-multi-size.ico
 	EndProjectSection
