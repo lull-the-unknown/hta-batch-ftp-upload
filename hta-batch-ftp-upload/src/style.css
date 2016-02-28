@@ -21,7 +21,15 @@ input[type=text] {
     width: 30em;
 }
 
-#txtSummaryFileName, #txtEditSummaryFileName, #lstPresets {
+#txtSummaryFileName, #txtEditSummaryFileName, #txtEditSummaryFileNamePreview {
+    width: 20em;
+}
+
+#txtEditSummaryFileName, #txtEditSummaryFileNamePreview {
+    width: 40em;
+}
+
+#lstPresets {
     width: 20em;
 }
 

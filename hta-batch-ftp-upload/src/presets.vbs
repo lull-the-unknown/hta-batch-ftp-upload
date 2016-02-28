@@ -8,17 +8,44 @@ Class Preset
     Public FtpPassword
 End Class
 
+Public Presets
 Set Presets = CreateObject("Scripting.Dictionary")
 Sub LoadPresets
-    'Set window.Presets = CreateObject("Scripting.Dictionary")
-    Set xDoc = CreateObject( "Microsoft.XMLDOM" )
+    'AddPreset_js false, "None", "", "", "", "", "", ""
+    Set objPreset = New Preset
+    objPreset.Name = "None"
+    objPreset.Directory = ""
+    objPreset.SummaryFilename = ""
+    objPreset.FtpHost = ""
+    objPreset.FtpDirectory = ""
+    objPreset.FtpUsername = ""
+    objPreset.FtpPassword = ""
+    window.Presets.Add objPreset.Name, objPreset
+    'AddPreset_js false, "New", "", "", "", "", "", ""
+    Set objPreset = New Preset
+    objPreset.Name = "New"
+    objPreset.Directory = ""
+    objPreset.SummaryFilename = ""
+    objPreset.FtpHost = ""
+    objPreset.FtpDirectory = ""
+    objPreset.FtpUsername = ""
+    objPreset.FtpPassword = ""
+    window.Presets.Add objPreset.Name, objPreset
+
+    Set xDoc = CreateObject( "MSXML2.DOMDocument" )
 	xDoc.async = False
 	xDoc.validateOnParse = False
 	If xDoc.Load("src/presets.xml") Then
 	    ' The document loaded successfully.
 	    Set xmlPresets = xDoc.getElementsByTagName("preset")
-        Set objPreset = Nothing
         For Each xmlPreset In xmlPresets
+'            AddPreset_js true, xmlPreset.getAttribute("name"), _ 
+'                            xmlPreset.getElementsByTagName("Directory").Item(0).Text,  _
+'                            xmlPreset.getElementsByTagName("SummaryFilename").Item(0).Text,  _
+'                            xmlPreset.getElementsByTagName("FtpHost").Item(0).Text,  _
+'                            xmlPreset.getElementsByTagName("FtpDirectory").Item(0).Text,  _
+'                            xmlPreset.getElementsByTagName("FtpUsername").Item(0).Text,  _
+'                            xmlPreset.getElementsByTagName("FtpPassword").Item(0).Text
             Set objPreset = New Preset
             objPreset.Name = xmlPreset.getAttribute("name")
             objPreset.Directory = xmlPreset.getElementsByTagName("Directory").Item(0).Text
@@ -50,46 +77,84 @@ Sub LoadPresets
         End If
 	End If
 	Set xDoc = Nothing
+    optPreset_Change
+    lstPresets_Change
 End Sub
 
 Sub AddPresetOption(byval text, byval value)
     Set drp = document.getElementById("optPreset")
     If drp Is Nothing Then Exit Sub
-
+    Set lst = document.getElementById("lstPresets")
+    If lst Is Nothing Then Exit Sub
+    
     Set opt = document.createElement("option")
     opt.value = value
     opt.text = text
     drp.options.add opt
+    Set opt = document.createElement("option")
+    opt.value = value
+    opt.text = text
+    lst.options.add opt, lst.options.length - 1
 End Sub
 
-Sub optPreset_Change
-    Set drp = document.getElementById("optPreset")
-    If drp Is Nothing Then Exit Sub
-    Set objPreset = window.Presets.Item(drp.value)
-    If objPreset Is Nothing Then 
+Function SavePreset( objPreset )
+    Set xDoc = CreateObject( "MSXML2.DOMDocument" )
+	xDoc.async = False
+	xDoc.validateOnParse = False
+	If xDoc.Load("src/presets.xml") Then
+	    ' The document loaded successfully.
+        Set root = xDoc.getElementsByTagName("presets").Item(0)
+	    Set xmlPresets = xDoc.getElementsByTagName("preset")
+        lowername = LCase(objPreset.Name)
+        For Each xmlPresets In xmlPresets
+            If (LCase(xmlPresets.getAttribute("name")) = lowername ) Then
+                root.RemoveChild xmlPresets
+            End If
+        Next
+
+        Set xmlPreset = xDoc.CreateElement("preset")
+        xmlPreset.SetAttribute "name", objPreset.Name
+        xmlPreset.AppendChild xDoc.CreateTextNode(vbNewLine & vbTab)
+        root.AppendChild xDoc.CreateTextNode(vbNewLine & vbTab)
+        root.AppendChild xmlPreset
+        root.AppendChild xDoc.CreateTextNode(vbNewLine)
+        
+        AddXmlEl xDoc, xmlPreset, "Directory", objPreset.Directory
+        AddXmlEl xDoc, xmlPreset, "SummaryFilename", objPreset.SummaryFilename
+        AddXmlEl xDoc, xmlPreset, "FtpHost", objPreset.FtpHost
+        AddXmlEl xDoc, xmlPreset, "FtpDirectory", objPreset.FtpDirectory
+        AddXmlEl xDoc, xmlPreset, "FtpUsername", objPreset.FtpUsername
+        AddXmlEl xDoc, xmlPreset, "FtpPassword", objPreset.FtpPassword
+               
+        xDoc.Save "src/presets.xml"
+        SavePreset = True
+	Else
+		' The document failed to load.
         Set out = document.getElementById("ErrorOut")
-        If out Is Nothing Then 
-            alert "Could not find preset."
-        Else
-            out.innerHTML = "Could not find preset."
-        End IF
-        drp.selectedIndex = 0
-        Exit Sub
-    end If
+        If Not out Is Nothing Then 
+		    Set xPE = xDoc.parseError
+		    With xPE
+			    errorOut.innerHTML = "Failed to load presets " & _
+				    "due the following error." & "<br />" & _
+				    "Error #: " & .errorCode & ": " & xPE.reason & _
+				    "Line #: " & .Line & "<br />" & _
+				    "Line Position: " & .linepos & "<br />" & _
+				    "Position In File: " & .filepos & "<br />" & _
+				    "Source Text: " & .srcText & "<br />" & _
+				    "Document URL: " & .url
+		    End With
+		    Set xPE = Nothing
+        End If
+        SavePreset = False
+	End If
+	Set xDoc = Nothing
+End Function
 
-    Set el = document.getElementById("txtDir")
-    If Not el Is Nothing Then el.value = objPreset.Directory
-    Set el = document.getElementById("txtSummaryFileName")
-    If Not el Is Nothing Then el.value = objPreset.SummaryFilename
-    Set el = document.getElementById("txtFtpHost")
-    If Not el Is Nothing Then el.value = objPreset.FtpHost
-    Set el = document.getElementById("txtFtpDirectory")
-    If Not el Is Nothing Then el.value = objPreset.FtpDirectory
-    Set el = document.getElementById("txtFtpUser")
-    If Not el Is Nothing Then el.value = objPreset.FtpUsername
-    Set el = document.getElementById("txtFtpPassword")
-    If Not el Is Nothing Then el.value = objPreset.FtpPassword
+Sub AddXmlEl( doc, xmlParent, name, text)
+    Set el = doc.CreateElement(name)
+    el.AppendChild doc.createTextNode(text)
 
-    txtDir_Change
-    txtSummaryFileName_Change
+    xmlParent.AppendChild doc.CreateTextNode(vbTab)
+    xmlParent.AppendChild(el)
+    xmlParent.AppendChild doc.CreateTextNode(vbNewLine & vbTab)
 End Sub
