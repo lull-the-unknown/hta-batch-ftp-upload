@@ -44,7 +44,7 @@ function CreateSummaryFile_MergeAll_EnforceHeaders(filePath, folderPath) {
 
             while (!file.AtEndOfStream) {
                 var dataToWrite = []
-                for (var i = 0; i < headers.length; i++) {
+                for (var i = 0; i < headers.numHeaders; i++) {
                     dataToWrite.push("")
                 }
                 var dataRead = SplitCsvLine(file.ReadLine())
@@ -106,6 +106,7 @@ function UpdateHeaders(summary, headers, summaryFilePath) {
             headerLine[i] = normalizeHeader(headerLine[i])
             headers[headerLine[i]] = i;
         }
+        headers.numHeaders = headerLine.length
 
         while (!tempFile.AtEndOfStream)
             summary.WriteLine(tempFile.ReadLine() + fieldExtentions)
