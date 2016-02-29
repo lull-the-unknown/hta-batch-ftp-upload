@@ -64,7 +64,6 @@ function lstPresets_Change() {
     var lst = document.getElementById("lstPresets")
     if (lst == null)
         return
-    //var objPreset = window.Presets_js[lst.value]
     var objPreset = window.Presets.Item(lst.value)
     if (objPreset == null) {
         var out = document.getElementById("ErrorOut")
@@ -72,7 +71,6 @@ function lstPresets_Change() {
             alert("Could not find preset.")
         else
             out.innerHTML = "Could not find preset."
-        //objPreset = window.Presets_js["None"]
         objPreset = window.Presets.Item("None");
     }
 
@@ -90,6 +88,9 @@ function lstPresets_Change() {
     el = document.getElementById("txtEditSummaryFileName")
     if (el != null)
         el.value = objPreset.SummaryFilename
+    el = document.getElementById("optEditSummaryMethod")
+    if (el != null)
+        el.value = objPreset.SummaryMethod
     el = document.getElementById("txtEditFtpHost")
     if (el != null)
         el.value = objPreset.FtpHost
@@ -105,6 +106,7 @@ function lstPresets_Change() {
 
     txtDir_Change("txtEditDir", "lblEditDirectoryStatus")
     txtSummaryFileName_Change("txtEditSummaryFileName", "txtEditSummaryFileNamePreview")
+    optSummaryMethod_Change('optSummaryMethod', 'lblSummaryMethodDescription')
     if (objPreset.Name == "New")
         btnEditPreset_Click()
     buttonStateChange_PresetNotEdit()
@@ -132,6 +134,9 @@ function buttonStateChange_PresetEdit() {
     if (el != null)
         el.disabled = false;
     el = document.getElementById('txtEditSummaryFileName');
+    if (el != null)
+        el.disabled = false;
+    el = document.getElementById('optEditSummaryMethod');
     if (el != null)
         el.disabled = false;
     el = document.getElementById('txtEditFtpHost');
@@ -172,6 +177,9 @@ function buttonStateChange_PresetNotEdit() {
     el = document.getElementById('txtEditSummaryFileName');
     if (el != null)
         el.disabled = true;
+    el = document.getElementById('optEditSummaryMethod');
+    if (el != null)
+        el.disabled = true;
     el = document.getElementById('txtEditFtpHost');
     if (el != null)
         el.disabled = true;
@@ -197,12 +205,13 @@ function btnSaveEditPreset_Click() {
     }
     preset.Directory = trim(document.getElementById("txtEditDir").value)
     preset.SummaryFilename = trim(document.getElementById("txtEditSummaryFileName").value)
+    preset.SummaryMethod = trim(document.getElementById("optEditSummaryMethod").value)
     preset.FtpHost = trim(document.getElementById("txtEditFtpHost").value)
     preset.FtpDirectory = trim(document.getElementById("txtEditFtpDirectory").value)
     preset.FtpUsername = trim(document.getElementById("txtEditFtpUser").value)
     preset.FtpPassword = trim(document.getElementById("txtEditFtpPassword").value)
     if (SavePreset(preset)) {
-        alert(preset.Name+" saved.");
+        alert(preset.Name + " saved.");
         window.location.reload()
         return
     }
@@ -251,7 +260,6 @@ function optPreset_Change() {
     var drp = document.getElementById("optPreset")
     if (drp == null)
         return
-    //var objPreset = window.Presets_js[drp.value]
     var objPreset = window.Presets.Item(drp.value)
     if (objPreset == null) {
         var out = document.getElementById("ErrorOut")
@@ -269,6 +277,9 @@ function optPreset_Change() {
     el = document.getElementById("txtSummaryFileName")
     if (el != null)
         el.value = objPreset.SummaryFilename
+    el = document.getElementById("optSummaryMethod")
+    if (el != null)
+        el.value = objPreset.SummaryMethod
     el = document.getElementById("txtFtpHost")
     if (el != null)
         el.value = objPreset.FtpHost
@@ -284,13 +295,14 @@ function optPreset_Change() {
 
     window.setTimeout(function () { txtDir_Change("txtDir", "lblDirectoryStatus") }, 0)
     window.setTimeout(function () { txtSummaryFileName_Change("txtSummaryFileName", "txtSummaryFileName") }, 0)
+    window.setTimeout(function () { optSummaryMethod_Change('optSummaryMethod', 'lblSummaryMethodDescription') }, 0)
 }
-function txtDir_Change( txtName, lblName ){
+function txtDir_Change(txtName, lblName) {
     var txt = document.getElementById(txtName)
-    if (txt == null) 
+    if (txt == null)
         return
     var lbl = document.getElementById(lblName)
-    if (lbl == null) 
+    if (lbl == null)
         return
 
     if (txt.value == "") {
@@ -298,34 +310,12 @@ function txtDir_Change( txtName, lblName ){
         return
     }
 
-    var fso = window.fso
-    if (fso == null) {
-        window.fso = new ActiveXObject("Scripting.FileSystemObject")
-        fso = window.fso
-    }
-    if (!fso.FolderExists(txt.value)){
-        lbl.innerHTML = "Directory Not Found"
+    var files = GetFiles(txt.value);
+    if (files.error != "") {
+        lbl.innerHTML = files.message
         return
     }
-                
-    var folder = fso.GetFolder(txt.value)
-    var files = folder.Files
-    if (files.Count < 1){
-        lbl.innerHTML = "Directory Empty"
-        return
-    }
-
-    var count = 0
-    var ext = ""
-    var en = new Enumerator(files);
-    for (; !en.atEnd() ; en.moveNext()) {
-        ext = en.item().Name
-        if (ext.length < 4)
-            continue;
-        ext = ext.substr(ext.length - 4)
-        if (ext == ".csv")
-            count++
-    }
+    var count = files.found.length
     lbl.innerHTML = count + " files found"
 }
 function btnDeletePreset_Click() {
@@ -338,10 +328,23 @@ function btnDeletePreset_Click() {
         return
 
     if (DeletePreset(name)) {
-        alert(trim(document.getElementById("lstPresets").value)+" deleted.");
+        alert(trim(document.getElementById("lstPresets").value) + " deleted.");
         window.location.reload()
         return
     }
     alert("Delete failed.");
     //buttonStateChange_PresetNotEdit()
+}
+function optSummaryMethod_Change(optSummaryMethod, lblSummaryMethodDescription) {
+    var drp = document.getElementById(optSummaryMethod)
+    if (drp == null)
+        return
+    var lbl = document.getElementById(lblSummaryMethodDescription)
+    if (lbl == null)
+        return
+
+    var opt = window.SummaryCreationMethodOptions[drp.value]
+    if (opt == null)
+        return
+    lbl.innerHTML = opt.Description
 }

@@ -15,14 +15,46 @@
         <link href="src/style.css" rel="stylesheet" />
         <script type="text/vbscript" src="src/presets.vbs" ></script>
         <!--<script type="text/javascript" src="src/presets.js" ></script>-->
+        <script type="text/javascript" src="src/fso.js" ></script>
         <script type="text/javascript" src="src/events.js" ></script>
         <script type="text/javascript">
-            
+            function Load_SummaryCreationMethodOptions() {
+                var options = window.SummaryCreationMethodOptions
+                if (options == null) {
+                    window.SummaryCreationMethodOptions = []
+                    options = window.SummaryCreationMethodOptions
+                }
+                var opt = {}
+                opt.Name = "None"
+                opt.Description = "No summary file will be created."
+                options.unshift(opt)
+                options[opt.Name] = opt
+
+                opt = {}
+                opt.Name = "MyMethod"
+                opt.Description = "If this were a real mehtod, it's description would go here."
+                options.push(opt)
+                options[opt.Name] = opt
+
+                var drp1 = document.getElementById('optSummaryMethod')
+                var drp2 = document.getElementById('optEditSummaryMethod')
+                var el
+                for (var i = 1; i < options.length; i++) {
+                    opt = options[i]
+                    el = document.createElement('option')
+                    el.innerHTML = opt.Name
+                    el.value = opt.Name
+                    drp1.appendChild(el)
+                    el = document.createElement('option')
+                    el.value = opt.Name
+                    el.innerHTML = opt.Name
+                    drp2.appendChild(el)
+                }
+            }
         </script>
         <script type="text/vbscript">
-            'Set fso = CreateObject("Scripting.FileSystemObject")
-            
             Sub Startup
+                Load_SummaryCreationMethodOptions
                 LoadPresets
                 buttonStateChange_PresetNotEdit
             End Sub
@@ -48,17 +80,31 @@
                         <option value="None" selected="selected">None</option>
                     </select>
                     <input type="button" id="btnPreset" value="Manage Presets" onclick="javascript: btnPreset_Click();" /></td></tr>
+            <tr><td colspan="2"><hr /></td></tr>
             <tr><td><label for="txtDir">Directory:</label></td>
                 <td><input type="text" id="txtDir" value="" onchange="javascript:txtDir_Change( 'txtDir', 'lblDirectoryStatus' );" />
                     <input type="file" id="fileSelector" value="" onchange="javascript:fileSelector_Change( 'fileSelector', 'txtDir' )" />
-                    <label for="fileSelector">(select one of the .csv files)</label></td></tr>
+                    </td></tr>
             <tr><td style="padding-top: 0px;">&nbsp;</td>
-                <td style="padding-top: 0px; padding-bottom: 1em; font-size: small;">
+                <td style="padding-top: 0px; font-size: small;">
                     <div><span>Status:</span>
                         <span id="lblDirectoryStatus">Unknown</span></div></td></tr>
+            <tr><td style="padding-top: 0px;">&nbsp;</td>
+                <td style="padding-top: 0px; padding-bottom: 1em;">
+                    <label for="fileSelector">(to browse for a folder, select one of the .csv files)</label></td></tr>
             <tr><td><label for="txtSummaryFileName">Summary filename:</label></td>
                 <td><input type="text" id="txtSummaryFileName" value="" onchange="javascript:txtSummaryFileName_Change( 'txtSummaryFileName', 'txtSummaryFileName' );" />
                     <label for="txtSummaryFileName">(leave blank to exclude the summary file)</label></td></tr>
+            <tr><td><label style="text-align:left;display:inline-block" for="optSummaryMethod">Summary File<br />Creation Routine:</label></td>
+                <td style="vertical-align:bottom">
+                    <select id="optSummaryMethod" onchange="javascript:optSummaryMethod_Change('optSummaryMethod', 'lblSummaryMethodDescription')">
+                        <option value="None">None</option>
+                    </select></td></tr>
+            <tr style="font-size:small;">
+                <td style="padding-top: 0px; padding-bottom: 1em;">
+                    <label for="optSummaryMethod">Description:</label></td>
+                <td style="padding-top: 0px; padding-bottom: 1em;">
+                    <label for="optSummaryMethod" id="lblSummaryMethodDescription">No summary file will be created.</label></td></tr>
             <tr><td><label for="txtFtpHost">FTP Host:</label></td>
                 <td><input type="text" id="txtFtpHost" value="" /></td></tr>
             <tr><td><label for="txtFtpUser">FTP Username:</label></td>
@@ -80,35 +126,48 @@
             <!--<option value="None">--- No Presets Found ---</option>-->
             <option value="New" selected="selected">&lt;Add New&gt;</option>
         </select><br /><br />
-        <table cellspacing="0" style="border:thin solid black">
-            <tr><td><input type="button" id="btnEditPreset" value="Edit" onclick="javascript:btnEditPreset_Click();" /></td>
+        <table class="withHorizontalLines" cellspacing="0" style="border:thin solid black">
+            <tr class="noTopBorder"><td><input type="button" id="btnEditPreset" value="Edit" onclick="javascript:btnEditPreset_Click();" /></td>
                 <td><input type="button" id="btnSaveEditPreset" value="Save" disabled="disabled" onclick="javascript: btnSaveEditPreset_Click();" />
                     <input type="button" id="btnCancelEditPreset" value="Cancel" disabled="disabled" onclick="javascript: lstPresets_Change();"/>
                     <input type="button" id="btnDeletePreset" value="Delete" onclick="javascript: btnDeletePreset_Click();"/></td></tr>
-            <tr><td><label for="txtEditName">Preset Name:</label></td>
+            <tr class="noTopBorder"><td><label for="txtEditName">Preset Name:</label></td>
                 <td><input type="text" id="txtEditName" value="" onchange="javascript:txtEditName_Change();"/>
                     <label for="txtEditName" id="lblEditNameValidation">&nbsp;</label>
                 </td></tr>
             <tr><td><label for="txtEditDir">Directory:</label></td>
                 <td><input type="text" id="txtEditDir" value="" onchange="javascript:txtDir_Change( 'txtEditDir', 'lblEditDirectoryStatus' );" />
                     <input type="file" id="EditfileSelector" value="" onchange="javascript:fileSelector_Change( 'EditfileSelector', 'txtEditDir' )" />
-                    <label for="EditfileSelector">(select one of the .csv files)</label></td></tr>
-            <tr><td style="padding-top: 0px;">&nbsp;</td>
-                <td style="padding-top: 0px; padding-bottom: 1em; font-size: small;">
+                    </td></tr>
+            <tr class="noTopBorder"><td style="padding-top: 0px;">&nbsp;</td>
+                <td style="padding-top: 0px; font-size: small;">
                     <div><span>Status:</span>
                          <span id="lblEditDirectoryStatus">Unknown</span></div></td></tr>
+            <tr class="noTopBorder"><td style="padding-top: 0px;">&nbsp;</td>
+                <td style="padding-top: 0px; ">
+                    <label for="fileSelector">(to browse for a folder, select one of the .csv files)</label></td></tr>
             <tr><td><label for="txtEditSummaryFileName">Summary filename:</label></td>
                 <td><input type="text" id="txtEditSummaryFileName" value="" onchange="javascript:txtSummaryFileName_Change( 'txtEditSummaryFileName', 'txtEditSummaryFileNamePreview' );" />
                     <!--<label for="txtEditSummaryFileName">(leave blank to exclude the summary file)</label>-->
                     </td></tr>
-            <tr><td style="padding-top: 0px;">&nbsp;</td>
+            <tr class="noTopBorder"><td style="padding-top: 0px;">&nbsp;</td>
                 <td style="padding-top: 0px; font-size: small;">
                     <label for="txtEditSummaryFileName">(use {year}, {month}, etc to enter parts of the date or time)</label></td></tr>
-            <tr style="font-size:small;">
+            <tr class="noTopBorder" style="font-size:small;">
                 <td style="padding-top: 0px;">
                     <label for="txtEditSummaryFileName">Preview:</label></td>
-                <td style="padding-top: 0px; padding-bottom: 1em;">
+                <td style="padding-top: 0px; ">
                     <input type="text" id="txtEditSummaryFileNamePreview" value="" disabled="disabled" /></td></tr>
+            <tr><td><label style="text-align:left;display:inline-block" for="optEditSummaryMethod">Summary File<br />Creation Routine:</label></td>
+                <td style="vertical-align:bottom">
+                    <select id="optEditSummaryMethod" onchange="javascript:optSummaryMethod_Change('optEditSummaryMethod', 'lblEditSummaryMethodDescription')">
+                        <option value="None">None</option>
+                    </select></td></tr>
+            <tr class="noTopBorder" style="font-size:small;">
+                <td style="padding-top: 0px;">
+                    <label for="optEditSummaryMethod">Description:</label></td>
+                <td style="padding-top: 0px;">
+                    <label for="optEditSummaryMethod" id="lblEditSummaryMethodDescription">No summary file will be created.</label></td></tr>
             <tr><td><label for="txtEditFtpHost">FTP Host:</label></td>
                 <td><input type="text" id="txtEditFtpHost" value="" /></td></tr>
             <tr><td><label for="txtEditFtpUser">FTP Username:</label></td>

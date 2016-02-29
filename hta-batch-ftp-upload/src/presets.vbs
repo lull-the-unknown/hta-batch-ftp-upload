@@ -2,6 +2,7 @@ Class Preset
     Public Name
     Public Directory
     Public SummaryFilename
+    Public SummaryMethod
     Public FtpHost
     Public FtpDirectory
     Public FtpUsername
@@ -11,7 +12,6 @@ End Class
 Public Presets
 Set Presets = CreateObject("Scripting.Dictionary")
 Sub LoadPresets
-    'AddPreset_js false, "None", "", "", "", "", "", ""
     Set objPreset = New Preset
     objPreset.Name = "None"
     objPreset.Directory = ""
@@ -21,7 +21,6 @@ Sub LoadPresets
     objPreset.FtpUsername = ""
     objPreset.FtpPassword = ""
     window.Presets.Add objPreset.Name, objPreset
-    'AddPreset_js false, "New", "", "", "", "", "", ""
     Set objPreset = New Preset
     objPreset.Name = "New"
     objPreset.Directory = ""
@@ -39,21 +38,15 @@ Sub LoadPresets
 	    ' The document loaded successfully.
 	    Set xmlPresets = xDoc.getElementsByTagName("preset")
         For Each xmlPreset In xmlPresets
-'            AddPreset_js true, xmlPreset.getAttribute("name"), _ 
-'                            xmlPreset.getElementsByTagName("Directory").Item(0).Text,  _
-'                            xmlPreset.getElementsByTagName("SummaryFilename").Item(0).Text,  _
-'                            xmlPreset.getElementsByTagName("FtpHost").Item(0).Text,  _
-'                            xmlPreset.getElementsByTagName("FtpDirectory").Item(0).Text,  _
-'                            xmlPreset.getElementsByTagName("FtpUsername").Item(0).Text,  _
-'                            xmlPreset.getElementsByTagName("FtpPassword").Item(0).Text
             Set objPreset = New Preset
             objPreset.Name = xmlPreset.getAttribute("name")
-            objPreset.Directory = xmlPreset.getElementsByTagName("Directory").Item(0).Text
-            objPreset.SummaryFilename = xmlPreset.getElementsByTagName("SummaryFilename").Item(0).Text
-            objPreset.FtpHost = xmlPreset.getElementsByTagName("FtpHost").Item(0).Text
-            objPreset.FtpDirectory = xmlPreset.getElementsByTagName("FtpDirectory").Item(0).Text
-            objPreset.FtpUsername = xmlPreset.getElementsByTagName("FtpUsername").Item(0).Text
-            objPreset.FtpPassword = xmlPreset.getElementsByTagName("FtpPassword").Item(0).Text
+            objPreset.Directory = GetValueOrDefault(xmlPreset, "Directory")
+            objPreset.SummaryFilename = GetValueOrDefault(xmlPreset, "SummaryFilename")
+            objPreset.SummaryMethod = GetValueOrDefault(xmlPreset, "SummaryMethod")
+            objPreset.FtpHost = GetValueOrDefault(xmlPreset, "FtpHost")
+            objPreset.FtpDirectory = GetValueOrDefault(xmlPreset, "FtpDirectory")
+            objPreset.FtpUsername = GetValueOrDefault(xmlPreset, "FtpUsername")
+            objPreset.FtpPassword = GetValueOrDefault(xmlPreset, "FtpPassword")
             
             window.Presets.Add objPreset.Name, objPreset
             AddPresetOption objPreset.Name, objPreset.Name
@@ -81,6 +74,14 @@ Sub LoadPresets
     lstPresets_Change
 End Sub
 
+Function GetValueOrDefault(xmlElement, settingName)
+    Set found = xmlElement.getElementsByTagName(settingName)
+    If found.length > 0 Then
+        GetValueOrDefault = found.Item(0).Text
+    Else
+        GetValueOrDefault = ""
+    End If
+End Function
 Sub AddPresetOption(byval text, byval value)
     Set drp = document.getElementById("optPreset")
     If drp Is Nothing Then Exit Sub
@@ -121,6 +122,7 @@ Function SavePreset( objPreset )
         
         AddXmlEl xDoc, xmlPreset, "Directory", objPreset.Directory
         AddXmlEl xDoc, xmlPreset, "SummaryFilename", objPreset.SummaryFilename
+        AddXmlEl xDoc, xmlPreset, "SummaryMethod", objPreset.SummaryMethod
         AddXmlEl xDoc, xmlPreset, "FtpHost", objPreset.FtpHost
         AddXmlEl xDoc, xmlPreset, "FtpDirectory", objPreset.FtpDirectory
         AddXmlEl xDoc, xmlPreset, "FtpUsername", objPreset.FtpUsername
