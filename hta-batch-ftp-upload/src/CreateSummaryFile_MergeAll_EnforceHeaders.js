@@ -18,30 +18,12 @@ function CreateSummaryFile_MergeAll_EnforceHeaders(filePath, folderPath) {
     var file = null;
     try {
         summary = CreateNewTextFile(filePath);
-        var currFilePath = files.pop()
-        if (currFilePath == filePath)
-            currFilePath = files.pop()
-        alert("opening " + currFilePath)
-        file = OpenTextFile_ReadOnly(currFilePath)
-        var headerLine = file.ReadLine()
-        summary.WriteLine(headerLine)
-        headerLine = SplitCsvLine(file.ReadLine())
         var headers = []
-        for (var i = 0; i < headerLine.length; i++) {
-            headerLine[i] = normalizeHeader(headerLine[i])
-            headers[headerLine[i]] = i;
-            alert(headerLine[i] + " = " + headers[headerLine[i]])
-        }
-        while( !file.AtEndOfStream )
-            summary.WriteLine(file.ReadLine())
-        file.Close()
-        file = null
         while (files.length > 0) {
             var lineCount = 0
-            currFilePath = files.pop()
+            var currFilePath = files.pop()
             if (currFilePath == filePath)
                 currFilePath = files.pop()
-            alert("opening " + currFilePath)
             file = OpenTextFile_ReadOnly(currFilePath)
             headerLine = SplitCsvLine(file.ReadLine())
             lineCount++;
@@ -52,8 +34,7 @@ function CreateSummaryFile_MergeAll_EnforceHeaders(filePath, folderPath) {
                     headers[headerLine[i]] = -1
                     headers.push(headerLine[i])
                     needsHeadersUpdated = true
-                }else
-                    alert(headerLine[i] +" = "+headers[headerLine[i]])
+                }
             }
             if (needsHeadersUpdated) {
                 var result = UpdateHeaders(summary, headers, filePath)
@@ -68,10 +49,10 @@ function CreateSummaryFile_MergeAll_EnforceHeaders(filePath, folderPath) {
                 }
                 var dataRead = SplitCsvLine(file.ReadLine())
                 lineCount++;
-                if (dataRead.length < headerLine.length) {
+                if (dataRead.length != headerLine.length) {
                     alert("Could not create summary file, an error occurred while processing one of the data files:\n\n"+
                             "number of data items(" + dataRead.length + ") on line " + lineCount + " does not match number " +
-                            "of items(" + header.length + ") in header row.\n\n" + currFilePath)
+                            "of items in header row(" + headerLine.length + ").\n\n" + currFilePath)
                     return false;
                 }
                 for (var i = 0; i < dataRead.length; i++) {
@@ -103,8 +84,9 @@ function UpdateHeaders(summary, headers, summaryFilePath) {
         MoveFile(summaryFilePath, tempFilePath)
         summary = CreateNewTextFile(summaryFilePath)
         tempFile = OpenTextFile_ReadOnly(tempFilePath)
-        alert("UpdatingHeaders")
-        var headerLine = tempFile.ReadLine()
+        var headerLine = ""
+        if (!tempFile.AtEndOfStream)
+            headerLine = tempFile.ReadLine()
         var numQuotes = headerLine.split('"').length - 1;
         if ((numQuotes % 2) == 1) // odd number of quotes means last escape is not unescaped
             headerLine += '"';
@@ -114,7 +96,9 @@ function UpdateHeaders(summary, headers, summaryFilePath) {
             headerLine += "," + headers[i] // add new headers
             fieldExtentions += "," // will add this to each existing data line to make sure numFields == numHeaders for existing data
         }
-        summary.Write(headerLine)
+        if (headerLine.substr(0, 1) == ",")
+            headerLine = headerLine.substr(1)
+        summary.WriteLine(headerLine)
 
         headerLine = SplitCsvLine(headerLine)
         headers = []

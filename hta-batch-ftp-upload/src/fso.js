@@ -44,7 +44,10 @@ function DeleteFile(filePath) {
     GetFso().DeleteFile(filePath)
 }
 function MoveFile(oldPath, newPath) {
-    GetFso().MoveFile(oldPath, newPath)
+    var fso = GetFso()
+    if (fso.FileExists(newPath))
+        fso.DeleteFile(newPath)
+    fso.MoveFile(oldPath, newPath)
 }
 function CreateNewTextFile(filePath) {
     var fso = GetFso()
