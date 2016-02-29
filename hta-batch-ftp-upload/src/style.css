@@ -55,7 +55,7 @@ input[type=text] {
     border-top-style: none;
 }
 
-#lblSummaryMethodDescription, #lblEditSummaryMethodDescription{
+#lblSummaryMethodDescription, #lblEditSummaryMethodDescription {
     /*font-style:italic*/
     /*border: 1px solid lightgray*/
     /*color:#333*/

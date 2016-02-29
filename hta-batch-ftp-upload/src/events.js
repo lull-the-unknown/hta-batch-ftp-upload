@@ -91,6 +91,8 @@ function lstPresets_Change() {
     el = document.getElementById("optEditSummaryMethod")
     if (el != null)
         el.value = objPreset.SummaryMethod
+    if (el.selectedIndex < 0)
+        el.selectedIndex = 0
     el = document.getElementById("txtEditFtpHost")
     if (el != null)
         el.value = objPreset.FtpHost
@@ -280,6 +282,8 @@ function optPreset_Change() {
     el = document.getElementById("optSummaryMethod")
     if (el != null)
         el.value = objPreset.SummaryMethod
+    if (el.selectedIndex < 0)
+        el.selectedIndex = 0
     el = document.getElementById("txtFtpHost")
     if (el != null)
         el.value = objPreset.FtpHost
@@ -346,5 +350,29 @@ function optSummaryMethod_Change(optSummaryMethod, lblSummaryMethodDescription) 
     var opt = window.SummaryCreationMethodOptions[drp.value]
     if (opt == null)
         return
-    lbl.innerHTML = opt.Description
+    lbl.fullText = opt.Description.replace(/\n/gm, "<br />");
+    lbl.innerHTML = lbl.fullText;
+    lblSummaryMethodDescription_HandleCollapse()
+}
+function lblSummaryMethodDescription_Click() {
+    var el = document.getElementById('lblSummaryMethodDescription')
+    if (el == null)
+        return
+    if (el.collapsed)
+        el.collapsed = false
+    else
+        el.collapsed = true
+    lblSummaryMethodDescription_HandleCollapse()
+}
+function lblSummaryMethodDescription_HandleCollapse() {
+    var el = document.getElementById('lblSummaryMethodDescription')
+    if (el == null)
+        return
+
+    if (el.collapsed) {
+        if (el.innerHTML.length > 35)
+            el.innerHTML = '<span style="color:gray">' + el.innerHTML.substr(0, 35) + '... </span><span style="font-weight:bold">&lt;click to expand&gt;</span>'
+    } else {
+        el.innerHTML = el.fullText
+    }
 }

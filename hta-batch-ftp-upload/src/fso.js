@@ -6,6 +6,11 @@ function GetFso() {
     }
     return result;
 }
+function GetFullPath(folderPath){
+    var fso = GetFso()
+    var folder = fso.GetFolder(folderPath)
+    return folder.Path
+}
 function GetFiles(folderPath) {
     var result = {}
     result.found = [];

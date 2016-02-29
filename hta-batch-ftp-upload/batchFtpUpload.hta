@@ -17,6 +17,7 @@
         <!--<script type="text/javascript" src="src/presets.js" ></script>-->
         <script type="text/javascript" src="src/fso.js" ></script>
         <script type="text/javascript" src="src/events.js" ></script>
+        <script type="text/javascript" src="src/CreateSummaryFile_MergeAll_EnforceHeaders.js" ></script>
         <script type="text/javascript">
             function Load_SummaryCreationMethodOptions() {
                 var options = window.SummaryCreationMethodOptions
@@ -27,13 +28,8 @@
                 var opt = {}
                 opt.Name = "None"
                 opt.Description = "No summary file will be created."
+                opt.Method = function () { return false;}
                 options.unshift(opt)
-                options[opt.Name] = opt
-
-                opt = {}
-                opt.Name = "MyMethod"
-                opt.Description = "If this were a real mehtod, it's description would go here."
-                options.push(opt)
                 options[opt.Name] = opt
 
                 var drp1 = document.getElementById('optSummaryMethod')
@@ -50,6 +46,17 @@
                     el.innerHTML = opt.Name
                     drp2.appendChild(el)
                 }
+
+                lblSummaryMethodDescription_Click();
+            }
+
+            function btnCreateSummaryFile_Click() {
+                var method = window.SummaryCreationMethodOptions[document.getElementById('optSummaryMethod').value].Method
+                var filePath = document.getElementById('txtSummaryFileName').value
+                var folderPath = document.getElementById('txtDir').value
+                if (folderPath == "")
+                    return
+                alert('result=' + method(filePath, folderPath))
             }
         </script>
         <script type="text/vbscript">
@@ -97,14 +104,14 @@
                     <label for="txtSummaryFileName">(leave blank to exclude the summary file)</label></td></tr>
             <tr><td><label style="text-align:left;display:inline-block" for="optSummaryMethod">Summary File<br />Creation Routine:</label></td>
                 <td style="vertical-align:bottom">
-                    <select id="optSummaryMethod" onchange="javascript:optSummaryMethod_Change('optSummaryMethod', 'lblSummaryMethodDescription')">
+                    <select id="optSummaryMethod" onchange="javascript:optSummaryMethod_Change('optSummaryMethod', 'lblSummaryMethodDescription')" >
                         <option value="None">None</option>
                     </select></td></tr>
             <tr style="font-size:small;">
-                <td style="padding-top: 0px; padding-bottom: 1em;">
+                <td style="padding-top: 0px; padding-bottom: 1em;vertical-align:top">
                     <label for="optSummaryMethod">Description:</label></td>
                 <td style="padding-top: 0px; padding-bottom: 1em;">
-                    <label for="optSummaryMethod" id="lblSummaryMethodDescription">No summary file will be created.</label></td></tr>
+                    <label for="optSummaryMethod" id="lblSummaryMethodDescription" onclick="lblSummaryMethodDescription_Click()">No summary file will be created.</label></td></tr>
             <tr><td><label for="txtFtpHost">FTP Host:</label></td>
                 <td><input type="text" id="txtFtpHost" value="" /></td></tr>
             <tr><td><label for="txtFtpUser">FTP Username:</label></td>
@@ -113,6 +120,9 @@
                 <td><input type="text" id="txtFtpPassword" value="" /></td></tr>
             <tr><td><label for="txtFtpDirectory">FTP Directory:</label></td>
                 <td><input type="text" id="txtFtpDirectory" value="" /></td></tr>
+            <tr><td style="padding-top: 2em;">&nbsp;</td>
+                <td style="padding-top: 2em;">
+                <input type="button" id="btnCreateSummaryFile" value="Create Summary File" onclick="javascript:btnCreateSummaryFile_Click()" /></td></tr>
         </table>
     </form>
     <form id="frmPresets" style="display: none;">
